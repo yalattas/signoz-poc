@@ -1,0 +1,54 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: clickhouse-debug-pod
+  namespace: signoz
+  labels:
+    app: devops-debug
+    retention: very-low
+    created-by: devops-handbook
+    custom-pod: "true"
+  annotations:
+    devops-handbook/auto-cleanup: "2h"
+    devops-handbook/created-by: "sre-pod-generator"
+    devops-handbook/purpose: "clickhouse-debugging-signoz"
+spec:
+  affinity:
+    nodeAffinity:
+      preferredDuringSchedulingIgnoredDuringExecution:
+      - weight: 100
+        preference:
+          matchExpressions:
+          - key: node-type
+            operator: In
+            values: ["web-arm"]
+      - weight: 50
+        preference:
+          matchExpressions:
+          - key: node-type
+            operator: In
+            values: ["web"]
+  containers:
+  - name: clickhouse-cli
+    image: altinity/clickhouse-server:25.3.6.10034.altinitystable
+    command: ["/bin/sh"]
+    args: ["-c", "while true; do sleep 30; done"]
+    env:
+    - name: CLICKHOUSE_HOST
+      value: "clickhouse-clickhouse.clickhouse.svc.cluster.local"
+    - name: CLICKHOUSE_PORT
+      value: "9000"
+    - name: CLICKHOUSE_USER
+      value: "default"
+    - name: CLICKHOUSE_PASSWORD
+      value: "default"
+    resources:
+      requests:
+        memory: "50Mi"
+        cpu: "50m"
+      limits:
+        memory: "200Mi"
+    securityContext:
+      allowPrivilegeEscalation: false
+      readOnlyRootFilesystem: false
+  restartPolicy: Never

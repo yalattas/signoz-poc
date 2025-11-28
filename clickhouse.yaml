@@ -1,0 +1,187 @@
+clickhouse:
+  defaultUser:
+    password: ""
+    password_secret_name: ""
+    allowExternalAccess: true
+    hostIP: 0.0.0.0/0
+
+  # users:
+  #   - name: app_user
+  #     hostIP: ["10.0.0.0/8"]  # default: "0.0.0.0/0"
+  #     accessManagement: 1  # default: 0
+  #     password_secret_name: "app-user-secret"  # secret must contain 'password' key
+  #     grants:
+  #       - "GRANT SELECT ON database.*"
+  replicasCount: 3
+  shardsCount: 1
+
+  clusterSecret:
+    # -- Whether to enable secret-based cluster communication
+    enabled: false
+    # -- Whether to secure this behind the SSL port
+    secure: false
+    # -- Auto-generate cluster secret (recommended for security)
+    auto: true
+    # -- Plaintext cluster secret value (not recommended for production)
+    value: ""
+    # -- Reference to an existing Kubernetes secret containing the cluster secret
+    valueFrom:
+      secretKeyRef:
+        # -- Name of the secret containing the cluster secret
+        name: ""
+        # -- Key in the secret that contains the cluster secret value
+        key: "secret"
+
+  # Specify which zones to run in.
+  # `replicaCount` will be applied within each zone.
+  zones: []
+
+  # If enabled, will prevent ClickHouse pods from running on the same node
+  antiAffinity: false
+
+  # -- Scope for anti-affinity policy when antiAffinity is enabled.
+  # Determines the level at which pod distribution is enforced.
+  # Available scopes:
+  #   - ClickHouseInstallation: Pods from the same installation won't run on the same node (default)
+  #   - Shard: Pods from the same shard won't run on the same node
+  #   - Replica: Pods from the same replica won't run on the same node
+  #   - Cluster: Pods from the same cluster won't run on the same node
+  #   - Namespace: Pods from the same namespace won't run on the same node
+  # @default -- ClickHouseInstallation
+  antiAffinityScope: "ClickHouseInstallation"
+
+  # -- Keeper connection settings for ClickHouse instances.
+  keeper:
+    # -- Specify a keeper host.
+    # Should be left empty if `clickhouse-keeper.enabled` is `true`.
+    # Will override the defaults set from `clickhouse-keeper.enabled`.
+    host: ""
+    # -- Override the default keeper port
+    port: 2181
+
+  persistence:
+    # -- enable storage
+    enabled: true
+    # -- volume size (per replica)
+    size: 10Gi
+    accessMode: ReadWriteOnce
+    ## -- StorageClass for PV (e.g. gp2, standard, ...)
+    storageClass: ""
+    logs:
+      # -- enable pvc for logs
+      enabled: false
+      # -- size for logs pvc
+      size: 10Gi
+      accessMode: ReadWriteOnce
+
+  image:
+    repository: altinity/clickhouse-server
+    pullPolicy: IfNotPresent
+    # -- Override the image tag for a specific version
+    tag: "25.3.6.10034.altinitystable"
+
+  service:
+    # e.g. `LoadBalancer`, `NodePort`
+    type: ClusterIP
+    serviceAnnotations: {}
+    serviceLabels: {}
+
+  lbService:
+    enabled: false
+    # -- Specify source IP ranges to the LoadBalancer service.
+    # If supported by the platform, this will restrict traffic through the cloud-provider load-balancer
+    # to the specified client IPs. This is ignored if the cloud-provider does not support the feature.
+    loadBalancerSourceRanges: []
+    serviceAnnotations: {}
+    serviceLabels: {}
+
+  # @ignore
+  imagePullSecrets: []
+
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: "clickhouse"
+
+  # -- Miscellanous config for ClickHouse (in xml format)
+  extraConfig: |
+    <clickhouse>
+      <default_replica_path>/clickhouse/shards/{shard}/databases/{database}/{table}</default_replica_path>
+      <default_replica_name>{replica}</default_replica_name>
+      <logger>
+          <formatting replace="replace">
+            <type>json</type>
+            <names>
+              <date_time>date_time</date_time>
+              <thread_name>thread_name</thread_name>
+              <thread_id>thread_id</thread_id>
+              <level>level</level>
+              <query_id>query_id</query_id>
+              <logger_name>logger_name</logger_name>
+              <message>message</message>
+              <source_file>source_file</source_file>
+              <source_line>source_line</source_line>
+            </names>
+          </formatting>
+        </logger>
+        <send_crash_reports replace="replace">
+          <enabled>false</enabled>
+        </send_crash_reports>
+        <async_load_databases replace="replace">false</async_load_databases>
+        <text_log>
+          <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+        </text_log>
+        <latency_log>
+          <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+        </latency_log>
+        <error_log>
+          <ttl>event_date + INTERVAL 7 DAY DELETE</ttl>
+        </error_log>
+        <query_metric_log>
+          <ttl>event_date + INTERVAL 3 DAY DELETE</ttl>
+        </query_metric_log>
+    </clickhouse>
+  # -- Additional users config for ClickHouse (in xml format)
+  extraUsers: |
+    <clickhouse>
+    </clickhouse>
+
+# CHK parameters
+keeper:
+  # -- Whether to enable Keeper.
+  # Required for replicated tables.
+  enabled: true
+  # -- Number of keeper replicas.
+  # Must be an odd number.
+  # !! DO NOT CHANGE AFTER INITIAL DEPLOYMENT
+  replicaCount: 3
+  image: "altinity/clickhouse-keeper"
+  tag: "25.3.6.10034.altinitystable"
+  # allows to configure multiple aspects and behavior for `clickhouse-keeper`
+  # instance
+  settings: {}
+  localStorage:
+    size: 5Gi
+    storageClass: ""
+  nodeSelector: {}
+  tolerations: []
+  podAnnotations: {}
+  volumeClaimAnnotations: {}
+  # topologySpreadConstraints over `zone`, by deafult there is only
+  # podAntiAffinity by hostname
+  zoneSpread: false
+  metricsPort: ""
+  resources:
+    cpuRequestsMs: 100
+    memoryRequestsMiB: 512Mi
+    cpuLimitsMs: 500
+    memoryLimitsMiB: 1Gi
+
+operator:
+  # -- Whether to enable the Altinity Operator for ClickHouse.
+  # Disable if you already have the Operator installed cluster-wide.
+  enabled: false

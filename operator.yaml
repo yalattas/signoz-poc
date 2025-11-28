@@ -1,0 +1,11 @@
+operator:
+  env: []
+  # - name: SAMPLE
+  #   value: value
+metrics:
+  enabled: false
+serviceAccount:
+  create: true
+  name: clickhouse-operator
+rbac:
+  create: true

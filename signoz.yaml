@@ -1,0 +1,796 @@
+# global -- Global override values for the chart.
+# @section -- Global Settings
+global:
+  clusterDomain: cluster.local
+  clusterName: "signoz"
+  cloud: other
+clickhouse:
+  enabled: false
+  zookeeper:
+    enabled: false
+    metrics:
+      enabled: false
+externalClickhouse:
+  host: clickhouse-clickhouse.clickhouse.svc.cluster.local
+  cluster: "clickhouse"
+  database: signoz_metrics
+  traceDatabase: signoz_traces
+  logDatabase: signoz_logs
+  meterDatabase: signoz_meter
+  user: default
+  password:
+  httpPort: 8123
+  tcpPort: 9000
+
+signoz:
+  persistence:
+    size: 5Gi
+schemaMigrator:
+  enabled: true
+  name: "schema-migrator"
+  enableReplication: true
+otelCollector:
+  configMap:
+    # otelCollector.configMap.create - Specifies whether a ConfigMap should be created.
+    # @default -- true
+    create: true
+  # otelCollector.serviceAccount -- Service Account configuration for the Otel Collector.
+  # @section -- Otel Collector
+  serviceAccount:
+    create: true
+    name: otel-collector
+  service:
+    # otelCollector.service.annotations - Annotations for the Otel Collector service object.
+    # @default -- {}
+    annotations: {}
+    # otelCollector.service.labels - Labels for the Otel Collector service object.
+    # @default -- {}
+    labels: {}
+    # otelCollector.service.type - The service type (`ClusterIP`, `NodePort`, `LoadBalancer`).
+    # @default -- "ClusterIP"
+    type: ClusterIP
+    # otelCollector.service.loadBalancerSourceRanges - Allowed source ranges when service type is `LoadBalancer`.
+    # @default -- []
+    loadBalancerSourceRanges: []
+  # otelCollector.annotations -- Annotations for the Otel Collector Deployment.
+  # @section -- Otel Collector
+  # @default -- null
+  annotations:
+  # otelCollector.podAnnotations -- Annotations for the Otel Collector pod(s).
+  # @section -- Otel Collector
+  # @default -- { signoz.io/scrape: "true", signoz.io/port: "8888" }
+  podAnnotations:
+    signoz.io/scrape: 'true'
+    signoz.io/port: '8888'
+  # otelCollector.podLabels -- Labels for the Otel Collector pod(s).
+  # @section -- Otel Collector
+  # @default -- {}
+  podLabels: {}
+  # otelCollector.additionalEnvs -- Additional environment variables for the Otel Collector.
+  # @section -- Otel Collector
+  # @default -- {}
+  additionalEnvs: {}
+  # env_key: env_value
+
+  # otelCollector.lowCardinalityExceptionGrouping -- Whether to enable grouping of exceptions with the same name but different stack traces. This is a tradeoff between cardinality and accuracy.
+  # @section -- Otel Collector
+  # @default -- false
+  lowCardinalityExceptionGrouping: false
+  # otelCollector.minReadySeconds -- Minimum number of seconds for a new pod to be ready.
+  # @section -- Otel Collector
+  # @default -- 5
+  minReadySeconds: 5
+  # otelCollector.progressDeadlineSeconds -- Maximum time in seconds for a deployment to make progress before it is considered failed.
+  # @section -- Otel Collector
+  # @default -- 600
+  progressDeadlineSeconds: 600
+  # otelCollector.replicaCount -- The number of pod replicas for the Otel Collector.
+  # @section -- Otel Collector
+  # @default -- 1
+  replicaCount: 1
+  # otelCollector.clusterRole -- RBAC ClusterRole configuration for the Otel Collector.
+  # @section -- Otel Collector
+  # @default -- "Please checkout the default values in values.yml"
+  clusterRole:
+    # otelCollector.clusterRole.create - Specifies whether a ClusterRole should be created.
+    # @default -- true
+    # @section -- Otel Collector
+    create: true
+    # otelCollector.clusterRole.annotations - Annotations to add to the ClusterRole.
+    # @default -- {}
+    annotations: {}
+    # @section -- Otel Collector
+    # otelCollector.clusterRole.name - The name of the ClusterRole to use. If not set, a name is generated.
+    # @default -- ""
+    name: ""
+    # otelCollector.clusterRole.rules - A set of RBAC rules. Required for the k8sattributes processor.
+    # ref: https://kubernetes.io/docs/reference/access-authn-authz/rbac/
+    # @default -- "Please checkout the default values in values.yml"
+    # @section -- Otel Collector
+    rules:
+      - apiGroups: [""]
+        resources: ["pods", "namespaces", "nodes"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["apps"]
+        resources: ["replicasets"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["extensions"]
+        resources: ["replicasets"]
+        verbs: ["get", "list", "watch"]
+      - apiGroups: ["batch"]
+        resources: ["jobs"]
+        verbs: ["get", "list", "watch"]
+    # otelCollector.clusterRole.clusterRoleBinding - ClusterRoleBinding configuration.
+    clusterRoleBinding:
+      # otelCollector.clusterRole.clusterRoleBinding.annotations - Annotations to add to the ClusterRoleBinding.
+      # @default -- {}
+      annotations: {}
+      # otelCollector.clusterRole.clusterRoleBinding.name - The name of the ClusterRoleBinding to use. If not set, a name is generated.
+      # @default -- ""
+      name: ""
+  # otelCollector.ports -- Port configurations for the Otel Collector.
+  # @section -- Otel Collector Ports
+  # @default -- "Please checkout the default values in values.yml"
+  ports:
+    # otelCollector.ports.otlp -- OTLP gRPC port configuration.
+    # @section -- Otel Collector Ports
+    otlp:
+      # otelCollector.ports.otlp.enabled - Whether to enable the service port for OTLP gRPC.
+      # @default -- true
+      enabled: true
+      # otelCollector.ports.otlp.containerPort - Container port for OTLP gRPC.
+      # @default -- 4317
+      containerPort: 4317
+      # otelCollector.ports.otlp.servicePort - Service port for OTLP gRPC.
+      # @default -- 4317
+      servicePort: 4317
+      # otelCollector.ports.otlp.nodePort - Node port for OTLP gRPC.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.otlp.protocol - Protocol for OTLP gRPC.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.otlp-http -- OTLP HTTP port configuration.
+    # @section -- Otel Collector Ports
+    otlp-http:
+      # otelCollector.ports.otlp-http.enabled - Whether to enable the service port for OTLP HTTP.
+      # @default -- true
+      enabled: true
+      # otelCollector.ports.otlp-http.containerPort - Container port for OTLP HTTP.
+      # @default -- 4318
+      containerPort: 4318
+      # otelCollector.ports.otlp-http.servicePort - Service port for OTLP HTTP.
+      # @default -- 4318
+      servicePort: 4318
+      # otelCollector.ports.otlp-http.nodePort - Node port for OTLP HTTP.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.otlp-http.protocol - Protocol for OTLP HTTP.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.jaeger-compact -- Jaeger Compact port configuration.
+    # @section -- Otel Collector Ports
+    jaeger-compact:
+      # otelCollector.ports.jaeger-compact.enabled - Whether to enable the service port for Jaeger Compact.
+      # @default -- false
+      enabled: false
+      # otelCollector.ports.jaeger-compact.containerPort - Container port for Jaeger Compact.
+      # @default -- 6831
+      containerPort: 6831
+      # otelCollector.ports.jaeger-compact.servicePort - Service port for Jaeger Compact.
+      # @default -- 6831
+      servicePort: 6831
+      # otelCollector.ports.jaeger-compact.nodePort - Node port for Jaeger Compact.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.jaeger-compact.protocol - Protocol for Jaeger Compact.
+      # @default -- "UDP"
+      protocol: UDP
+    # otelCollector.ports.jaeger-thrift -- Jaeger Thrift port configuration.
+    # @section -- Otel Collector Ports
+    jaeger-thrift:
+      # otelCollector.ports.jaeger-thrift.enabled - Whether to enable the service port for Jaeger Thrift HTTP.
+      # @default -- true
+      enabled: false
+      # otelCollector.ports.jaeger-thrift.containerPort - Container port for Jaeger Thrift.
+      # @default -- 14268
+      containerPort: 14268
+      # otelCollector.ports.jaeger-thrift.servicePort - Service port for Jaeger Thrift.
+      # @default -- 14268
+      servicePort: 14268
+      # otelCollector.ports.jaeger-thrift.nodePort - Node port for Jaeger Thrift.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.jaeger-thrift.protocol - Protocol for Jaeger Thrift.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.jaeger-grpc -- Jaeger gRPC port configuration.
+    # @section -- Otel Collector Ports
+    jaeger-grpc:
+      # otelCollector.ports.jaeger-grpc.enabled - Whether to enable the service port for Jaeger gRPC.
+      # @default -- true
+      enabled: false
+      # otelCollector.ports.jaeger-grpc.containerPort - Container port for Jaeger gRPC.
+      # @default -- 14250
+      containerPort: 14250
+      # otelCollector.ports.jaeger-grpc.servicePort - Service port for Jaeger gRPC.
+      # @default -- 14250
+      servicePort: 14250
+      # otelCollector.ports.jaeger-grpc.nodePort - Node port for Jaeger gRPC.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.jaeger-grpc.protocol - Protocol for Jaeger gRPC.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.zipkin -- Zipkin port configuration.
+    # @section -- Otel Collector Ports
+    zipkin:
+      # otelCollector.ports.zipkin.enabled - Whether to enable the service port for Zipkin.
+      # @default -- false
+      enabled: false
+      # otelCollector.ports.zipkin.containerPort - Container port for Zipkin.
+      # @default -- 9411
+      containerPort: 9411
+      # otelCollector.ports.zipkin.servicePort - Service port for Zipkin.
+      # @default -- 9411
+      servicePort: 9411
+      # otelCollector.ports.zipkin.nodePort - Node port for Zipkin.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.zipkin.protocol - Protocol for Zipkin.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.metrics -- Internal metrics port configuration.
+    # @section -- Otel Collector Ports
+    metrics:
+      # otelCollector.ports.metrics.enabled - Whether to enable the service port for internal metrics.
+      # @default -- true
+      enabled: false
+      # otelCollector.ports.metrics.containerPort - Container port for internal metrics.
+      # @default -- 8888
+      containerPort: 8888
+      # otelCollector.ports.metrics.servicePort - Service port for internal metrics.
+      # @default -- 8888
+      servicePort: 8888
+      # otelCollector.ports.metrics.nodePort - Node port for internal metrics.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.metrics.protocol - Protocol for internal metrics.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.zpages -- ZPages port configuration.
+    # @section -- Otel Collector Ports
+    zpages:
+      # otelCollector.ports.zpages.enabled - Whether to enable the service port for ZPages.
+      # @default -- false
+      enabled: false
+      # otelCollector.ports.zpages.containerPort - Container port for ZPages.
+      # @default -- 55679
+      containerPort: 55679
+      # otelCollector.ports.zpages.servicePort - Service port for ZPages.
+      # @default -- 55679
+      servicePort: 55679
+      # otelCollector.ports.zpages.nodePort - Node port for ZPages.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.zpages.protocol - Protocol for ZPages.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.pprof -- pprof port configuration.
+    # @section -- Otel Collector Ports
+    pprof:
+      # otelCollector.ports.pprof.enabled - Whether to enable the service port for pprof.
+      # @default -- false
+      enabled: false
+      # otelCollector.ports.pprof.containerPort - Container port for pprof.
+      # @default -- 1777
+      containerPort: 1777
+      # otelCollector.ports.pprof.servicePort - Service port for pprof.
+      # @default -- 1777
+      servicePort: 1777
+      # otelCollector.ports.pprof.nodePort - Node port for pprof.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.pprof.protocol - Protocol for pprof.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.logsheroku -- Heroku logs port configuration.
+    # @section -- Otel Collector Ports
+    logsheroku:
+      # otelCollector.ports.logsheroku.enabled - Whether to enable the service port for Heroku logs.
+      # @default -- true
+      enabled: false
+      # otelCollector.ports.logsheroku.containerPort - Container port for Heroku logs.
+      # @default -- 8081
+      containerPort: 8081
+      # otelCollector.ports.logsheroku.servicePort - Service port for Heroku logs.
+      # @default -- 8081
+      servicePort: 8081
+      # otelCollector.ports.logsheroku.nodePort - Node port for Heroku logs.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.logsheroku.protocol - Protocol for Heroku logs.
+      # @default -- "TCP"
+      protocol: TCP
+    # otelCollector.ports.logsjson -- JSON logs port configuration.
+    # @section -- Otel Collector Ports
+    logsjson:
+      # otelCollector.ports.logsjson.enabled - Whether to enable the service port for JSON logs.
+      # @default -- true
+      enabled: true
+      # otelCollector.ports.logsjson.containerPort - Container port for JSON logs.
+      # @default -- 8082
+      containerPort: 8082
+      # otelCollector.ports.logsjson.servicePort - Service port for JSON logs.
+      # @default -- 8082
+      servicePort: 8082
+      # otelCollector.ports.logsjson.nodePort - Node port for JSON logs.
+      # @default -- ""
+      nodePort: ""
+      # otelCollector.ports.logsjson.protocol - Protocol for JSON logs.
+      # @default -- "TCP"
+      protocol: TCP
+  # otelCollector.livenessProbe -- Liveness probe configuration.
+  # ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-probes/#configure-probes
+  # @section -- Otel Collector
+  # @default -- "Please checkout the default values in values.yml"
+  livenessProbe:
+    enabled: true
+    port: 13133
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  # otelCollector.readinessProbe -- Readiness probe configuration.
+  # @section -- Otel Collector
+  # @default -- "Please checkout the default values in values.yml"
+  readinessProbe:
+    enabled: true
+    port: 13133
+    path: /
+    initialDelaySeconds: 5
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 6
+    successThreshold: 1
+  # otelCollector.customLivenessProbe -- Custom liveness probe to override the default.
+  # @section -- Otel Collector
+  # @default -- {}
+  customLivenessProbe: {}
+  # otelCollector.customReadinessProbe -- Custom readiness probe to override the default.
+  # @section -- Otel Collector
+  # @default -- {}
+  customReadinessProbe: {}
+  # otelCollector.extraVolumeMounts -- Extra volume mounts for the Otel Collector pod.
+  # @section -- Otel Collector
+  # @default -- []
+  extraVolumeMounts: []
+  # otelCollector.extraVolumes -- Extra volumes for the Otel Collector pod.
+  # @section -- Otel Collector
+  # @default -- []
+  extraVolumes: []
+  # otelCollector.ingress -- Ingress configuration for the Otel Collector.
+  # @section -- Otel Collector Networking
+  ingress:
+    # otelCollector.ingress.enabled - Enable ingress controller resource.
+    # @default -- false
+    enabled: false
+    # otelCollector.ingress.className - Ingress class name.
+    # @default -- ""
+    className: ""
+    # otelCollector.ingress.annotations - Annotations for the ingress resource.
+    # @default -- {}
+    annotations: {}
+    # cert-manager.io/cluster-issuer: letsencrypt-prod
+    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    # nginx.ingress.kubernetes.io/backend-protocol: "GRPC"
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+    # otelCollector.ingress.hosts -- Hostname and path configurations for the ingress.
+    # @default -- "Please checkout the default values in values.yml"
+    # @section -- Otel Collector Networking
+    hosts:
+      - host: otelcollector.domain.com
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            port: 4318
+    # otelCollector.ingress.tls - TLS configuration for the ingress.
+    # @default -- []
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - otelcollector.domain.com
+  # otelCollector.resources -- Resource requests and limits.
+  # Ref: http://kubernetes.io/docs/user-guide/compute-resources/
+  # @section -- Otel Collector
+  # @default -- { requests: { cpu: "100m", memory: "200Mi" } }
+  resources:
+    requests:
+      cpu: 100m
+      memory: 200Mi
+  #   limits:
+  #     cpu: "1"
+  #     memory: 2Gi
+
+  # otelCollector.priorityClassName -- Priority class for the Otel Collector pods.
+  # @section -- Otel Collector
+  # @default -- ""
+  priorityClassName: ""
+  # otelCollector.nodeSelector -- Node selector for pod assignment.
+  # @section -- Otel Collector
+  # @default -- {}
+  nodeSelector: {}
+  # otelCollector.tolerations -- Tolerations for pod assignment.
+  # @section -- Otel Collector
+  # @default -- []
+  tolerations: []
+  # otelCollector.affinity -- Affinity settings for pod assignment.
+  # @section -- Otel Collector
+  # @default -- {}
+  affinity: {}
+  # otelCollector.topologySpreadConstraints -- Topology spread constraints for pod distribution.
+  # @section -- Otel Collector
+  # @default -- "Please checkout the default values in values.yml"
+  topologySpreadConstraints:
+    - maxSkew: 1
+      topologyKey: kubernetes.io/hostname
+      whenUnsatisfiable: ScheduleAnyway
+      labelSelector:
+        matchLabels:
+          app.kubernetes.io/component: otel-collector
+  # otelCollector.podSecurityContext -- Pod-level security context.
+  # @section -- Otel Collector
+  # @default -- {}
+  podSecurityContext: {}
+  # fsGroup: 2000
+
+  # otelCollector.securityContext -- Container-level security context.
+  # @section -- Otel Collector
+  # @default -- {}
+  securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+  # otelCollector.autoscaling -- Autoscaling configuration (HPA).
+  # @section -- Otel Collector
+  # @default -- "Please checkout the default values in values.yml"
+  autoscaling:
+    # otelCollector.autoscaling.enabled - Enable Horizontal Pod Autoscaler.
+    # @default -- false
+    enabled: false
+    # otelCollector.autoscaling.minReplicas - Minimum number of replicas.
+    # @default -- 1
+    minReplicas: 1
+    # otelCollector.autoscaling.maxReplicas - Maximum number of replicas.
+    # @default -- 11
+    maxReplicas: 11
+    # otelCollector.autoscaling.targetCPUUtilizationPercentage - Target CPU utilization percentage.
+    # @default -- 50
+    targetCPUUtilizationPercentage: 50
+    # otelCollector.autoscaling.targetMemoryUtilizationPercentage - Target memory utilization percentage.
+    # @default -- 50
+    targetMemoryUtilizationPercentage: 50
+    # otelCollector.autoscaling.behavior - Scaling behavior policies.
+    # @default -- {}
+    behavior: {}
+    # scaleDown:
+    #   stabilizationWindowSeconds: 300
+    #  policies:
+    #   - type: Pods
+    #     value: 1
+    #     periodSeconds: 180
+    # scaleUp:
+    #   stabilizationWindowSeconds: 300
+    #   policies:
+    #   - type: Pods
+    #     value: 2
+    #     periodSeconds: 60
+
+    # otelCollector.autoscaling.autoscalingTemplate - Template for autoscaling.
+    # @default -- []
+    autoscalingTemplate: []
+    # otelCollector.autoscaling.keda -- KEDA-based autoscaling configuration.
+    # @section -- Otel Collector
+    keda:
+      # otelCollector.autoscaling.keda.annotations - Annotations for the KEDA ScaledObject.
+      # @default -- null
+      annotations:
+      # otelCollector.autoscaling.keda.enabled - Enable KEDA autoscaling.
+      # @default -- false
+      enabled: false
+      # otelCollector.autoscaling.keda.pollingInterval - Polling interval for metrics data (in seconds).
+      # @default -- "30"
+      pollingInterval: "30"
+      # otelCollector.autoscaling.keda.cooldownPeriod - Cooldown period before downscaling (in seconds).
+      # @default -- "300"
+      cooldownPeriod: "300"
+      # otelCollector.autoscaling.keda.minReplicaCount - Minimum replica count for KEDA.
+      # @default -- "1"
+      minReplicaCount: "1"
+      # otelCollector.autoscaling.keda.maxReplicaCount - Maximum replica count for KEDA.
+      # @default -- "5"
+      maxReplicaCount: "5"
+      # otelCollector.autoscaling.keda.triggers - KEDA trigger configuration.
+      # @default -- []
+      triggers: []
+  # otelCollector.config -- Main configuration for the OpenTelemetry Collector pipelines.
+  # @section -- Otel Collector Configuration
+  # @default -- "Please checkout the default values in values.yml"
+  config:
+    # receivers: {}
+    processors:
+      batch:
+        send_batch_size: 50000
+        timeout: 5s
+signoz-otel-gateway:
+  enabled: false
+  # @ignored
+  replicaCount: 1
+  # @ignored
+  resources:
+    requests:
+      cpu: 2500m
+      memory: 2500Mi
+      # @ignored
+      # config:
+    # exporters:
+    #   signozkafka:
+    #     brokers:
+    #     # replace with the correct address based on the release name
+    #     # - redpanda-0.redpanda.redpanda.svc.cluster.local:9093
+    #     # - redpanda-1.redpanda.redpanda.svc.cluster.local:9093
+    #     # - redpanda-2.redpanda.redpanda.svc.cluster.local:9093
+    #     producer:
+    #       compression: lz4
+    #       max_message_bytes: 209715200
+    #     protocol_version: 2.0.0
+    # extensions:
+    #   health_check:
+    #     endpoint: 0.0.0.0:13133
+    #     path: /healthz
+    #   signozadminapi:
+    #     cache:
+    #       extension: signozcache
+    #     endpoint: 0.0.0.0:8001
+    #     limiter:
+    #       policy: postgres
+    #     storage:
+    #       extension: signozstorage
+    #   signozcache:
+    #     strategy: ${env:OTELGATEWAY_CACHE_STRATEGY}
+    #     uri:
+    #       database: ${env:OTELGATEWAY_REDIS_DATABASE}
+    #       host: ${env:OTELGATEWAY_REDIS_HOST}
+    #       port: ${env:OTELGATEWAY_REDIS_PORT}
+    #   signozkeyauth:
+    #     cache:
+    #       extension: signozcache
+    #     headers:
+    #       - signoz-access-token
+    #       - authorization
+    #       - signoz-ingestion-key
+    #       - x-amz-firehose-access-key
+    #     storage:
+    #       extension: signozstorage
+    #   signozstorage:
+    #     strategy: ${env:OTELGATEWAY_STORAGE_STRATEGY}
+    #     uri:
+    #       database: ${env:OTELGATEWAY_POSTGRES_DATABASE}
+    #       host: ${env:OTELGATEWAY_POSTGRES_HOST}
+    #       password: ${env:OTELGATEWAY_POSTGRES_PASSWORD}
+    #       port: ${env:OTELGATEWAY_POSTGRES_PORT}
+    #       user: ${env:OTELGATEWAY_POSTGRES_USER}
+    #   zpages:
+    #     endpoint: :55679
+    # processors:
+    #   batch:
+    #     metadata_keys:
+    #       - signoz-workspace-name
+    #     send_batch_max_size: 25000
+    #     send_batch_size: 20000
+    #     timeout: 10s
+    #   signozlimiter/postgres:
+    #     cache:
+    #       extension: signozcache
+    #     policy: postgres
+    #     storage:
+    #       extension: signozstorage
+    # receivers:
+    #   otlp:
+    #     protocols:
+    #       grpc:
+    #         auth:
+    #           authenticator: signozkeyauth
+    #         endpoint: 0.0.0.0:4317
+    #         max_recv_msg_size_mib: 16
+    #       http:
+    #         auth:
+    #           authenticator: signozkeyauth
+    #         cors:
+    #           allowed_origins:
+    #             - '*'
+    #         endpoint: 0.0.0.0:4318
+    #   signozhttplog/heroku:
+    #     auth:
+    #       authenticator: signozkeyauth
+    #     endpoint: 0.0.0.0:8081
+    #     source: heroku
+    #   signozhttplog/json:
+    #     auth:
+    #       authenticator: signozkeyauth
+    #     endpoint: 0.0.0.0:8082
+    #     source: json
+    #   signozawsfirehose/cwmetrics:
+    #     auth:
+    #       authenticator: signozkeyauth
+    #     endpoint: 0.0.0.0:8084
+    #     record_type: cwmetrics
+    #   signozawsfirehose/cwlogs:
+    #     auth:
+    #       authenticator: signozkeyauth
+    #     endpoint: 0.0.0.0:8085
+    #     record_type: cwlogs
+    #   signozawsfirehose/otlp_v1:
+    #     auth:
+    #       authenticator: signozkeyauth
+    #     endpoint: 0.0.0.0:8086
+    #     record_type: otlp_v1
+    # service:
+    #   extensions:
+    #     - signozstorage
+    #     - signozcache
+    #     - zpages
+    #     - signozkeyauth
+    #     - health_check
+    #     - signozadminapi
+    #   pipelines:
+    #     logs:
+    #       exporters:
+    #         - signozkafka
+    #       processors:
+    #         # replace with signozlimiter/redis if redis is used as cache backend
+    #         - signozlimiter/postgres
+    #         - batch
+    #       receivers:
+    #         - otlp
+    #         - signozhttplog/heroku
+    #         - signozhttplog/json
+    #         - signozawsfirehose/cwlogs
+    #     metrics:
+    #       exporters:
+    #         - signozkafka
+    #       processors:
+    #         # replace with signozlimiter/redis if redis is used as cache backend
+    #         - signozlimiter/postgres
+    #         - batch
+    #       receivers:
+    #         - otlp
+    #         - signozawsfirehose/cwmetrics
+    #         - signozawsfirehose/otlp_v1
+    #     traces:
+    #       exporters:
+    #         - signozkafka
+    #       processors:
+    #         # replace with signozlimiter/redis if redis is used as cache backend
+    #         - signozlimiter/postgres
+    #         - batch
+    #       receivers:
+    #         - otlp
+  # @ignored
+  env:
+    cache_strategy: "off"
+    storage_strategy: postgres
+    # postgres_database:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       key: database
+    #       name: postgres-secret-otelgateway
+    # postgres_host:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       key: host
+    #       name: postgres-secret-otelgateway
+    # postgres_password:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       key: password
+    #       name: postgres-secret-otelgateway
+    # postgres_port:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       key: port
+    #       name: postgres-secret-otelgateway
+    # postgres_user:
+    #   valueFrom:
+    #     secretKeyRef:
+    #       key: username
+    #       name: postgres-secret-otelgateway
+  # @ignored
+  fullnameOverride: opentelemetry-gateway
+  # @ignored
+  ingress: []
+  # @ignored
+  service:
+    annotations: {}
+    ports:
+      otlp:
+        containerPort: 4317
+        enabled: true
+        protocol: TCP
+        servicePort: 4317
+      otlp-grpc:
+        enabled: false
+      aws-cwmetrics:
+        enabled: true
+        containerPort: 8084
+        servicePort: 8084
+        protocol: TCP
+      aws-cwlogs:
+        enabled: true
+        containerPort: 8085
+        servicePort: 8085
+        protocol: TCP
+      aws-otlp:
+        enabled: true
+        containerPort: 8086
+        servicePort: 8086
+        protocol: TCP
+    type: NodePort
+# -- This component is configurable with licensed version of SigNoz.
+# @section -- Redpanda Settings
+redpanda:
+  enabled: false
+  # @ignored
+  fullnameOverride: redpanda
+  # @ignored
+  config:
+    cluster:
+      auto_create_topics_enabled: true
+      default_topic_partitions: 3
+      delete_retention_ms: 21600000
+    tunable:
+      kafka_batch_max_bytes: 209715200
+      kafka_request_max_bytes: 209715200
+  # @ignored
+  console:
+    enabled: false
+  # @ignored
+  rbac:
+    enabled: false
+  # @ignored
+  resources:
+    cpu:
+      cores: 7
+    memory:
+      container:
+        max: 28Gi
+  # @ignored
+  serviceAccount:
+    create: false
+  # @ignored
+  statefulset:
+    podTemplate:
+      annotations:
+        signoz.io/path: /public_metrics
+        signoz.io/port: "9644"
+        signoz.io/scrape: "true"
+    replicas: 3
+    terminationGracePeriodSeconds: 180
+  # @ignored
+  storage:
+    persistentVolume:
+      size: 100Gi
+      storageClass: null
+  # @ignored
+  tls:
+    certs:
+      external:
+        caEnabled: false
+    enabled: false

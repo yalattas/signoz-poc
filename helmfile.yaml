@@ -1,0 +1,45 @@
+helmDefaults:
+  kubeContext: kind-signoz
+  atomic: true
+  verify: false
+  wait: true
+  timeout: 96000
+  force: false
+  createNamespace: true
+
+repositories:
+  - name: signoz
+    url: https://charts.signoz.io
+  - name: clickhouse-operator
+    url: https://docs.altinity.com/clickhouse-operator/
+  - name: clickhouse
+    url: https://helm.altinity.com
+  - name: opentelemetry
+    url: https://open-telemetry.github.io/opentelemetry-helm-charts
+releases:
+  - name: clickhouse-operator
+    namespace: clickhouse
+    chart: clickhouse-operator/altinity-clickhouse-operator
+    version: 0.25.0
+    values:
+      - operator.yaml
+  - name: clickhouse
+    namespace: clickhouse
+    chart: clickhouse/clickhouse
+    version: 0.3.6
+    values:
+      - clickhouse.yaml
+  - name: signoz
+    namespace: signoz
+    chart: signoz/signoz
+    version: 0.85.1
+    values:
+      - signoz.yaml
+  - name: demo
+    namespace: test
+    chart: opentelemetry/opentelemetry-demo
+    version: 0.38.6
+    values:
+      - demo.yaml
+
+
