@@ -14,4 +14,11 @@ from django.conf import settings
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'conf.settings')
 
+from opentelemetry.instrumentation.django import DjangoInstrumentor
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
+from opentelemetry.instrumentation.asgi import OpenTelemetryMiddleware
+DjangoInstrumentor().instrument()
+LoggingInstrumentor().instrument(set_logging_format=True)
+
 application = get_asgi_application()
+app = OpenTelemetryMiddleware(application)

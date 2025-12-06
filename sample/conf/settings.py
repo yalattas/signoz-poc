@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'rest_framework',
     'apps.demo',
 ]
 
@@ -70,6 +71,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'conf.wsgi.application'
+ASGI_APPLICATION = 'conf.asgi.application'
 
 
 # Database
@@ -153,8 +155,41 @@ OTEL_PYTHON_DJANGO_INSTRUMENT = os.environ.get("OTEL_PYTHON_DJANGO_INSTRUMENT", 
 OTEL_SERVICE_NAME = os.environ.get("OTEL_SERVICE_NAME", "signoz-poc-django-app")
 OTEL_SERVICE_VERSION = os.environ.get("OTEL_SERVICE_VERSION", "0.0.1")
 OTEL_TRACES_EXPORTER = os.environ.get("OTEL_TRACES_EXPORTER", "console,otlp")
-OTEL_METRICS_EXPORTER = os.environ.get("OTEL_METRICS_EXPORTER", "console")
-OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "localhost:4317")
+OTEL_METRICS_EXPORTER = os.environ.get("OTEL_METRICS_EXPORTER", "console,otlp")
+OTEL_LOGS_EXPORTER = os.environ.get("OTEL_LOGS_EXPORTER", "console,otlp")
 OTEL_EXPORTER_OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "localhost:4317")
 OTEL_EXPORTER_OTLP_PROTOCOL = os.environ.get("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
 OTEL_RESOURCE_ATTRIBUTES = os.environ.get("OTEL_RESOURCE_ATTRIBUTES", f"service.name={OTEL_SERVICE_NAME},service.version={OTEL_SERVICE_VERSION}")
+
+# Logging configuration for OpenTelemetry
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+            'formatter': 'verbose'
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'INFO',
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['console'],
+            'level': 'INFO',
+            'propagate': False,
+        },
+    },
+}

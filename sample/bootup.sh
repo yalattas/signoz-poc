@@ -9,7 +9,7 @@ ENTRYPOINT=${1:-web}
 OTEL_ENABLED=${OTEL_ENABLED:-"false"}
 
 # Common signal handling
-trap 'sleep 20' SIGTERM SIGINT
+trap 'sleep 20' TERM INT
 
 # Function to run database migrations and static files collection
 setup_django() {
@@ -24,9 +24,9 @@ case "$ENTRYPOINT" in
         setup_django
         if [ "$OTEL_ENABLED" = "true" ]; then
             echo "OTEL is enabled. Starting with OpenTelemetry instrumentation..."
-            opentelemetry-instrument uvicorn conf.asgi:application --host "0.0.0.0" --port 8000
+            opentelemetry-instrument uwsgi --http 0.0.0.0:8000 --module conf.wsgi:app --master --processes 1 --threads 1 --buffer-size 65536 --post-buffering 8192 --http-timeout 300
         else
-            uvicorn conf.asgi:application --host "0.0.0.0" --port 8000
+            uwsgi --http 0.0.0.0:8000 --module conf.wsgi:app --master --processes 1 --threads 1 --buffer-size 65536 --post-buffering 8192 --http-timeout 300
         fi
         ;;
     queue)

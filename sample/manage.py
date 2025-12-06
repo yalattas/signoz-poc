@@ -16,7 +16,9 @@ def main():
     # Initialize OpenTelemetry if enabled
     if getattr(settings, 'OTEL_ENABLED', False):
         from opentelemetry.instrumentation.django import DjangoInstrumentor
+        from opentelemetry.instrumentation.logging import LoggingInstrumentor
         DjangoInstrumentor().instrument()
+        LoggingInstrumentor().instrument(set_logging_format=True)
 
     try:
         from django.core.management import execute_from_command_line

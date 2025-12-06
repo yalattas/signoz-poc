@@ -15,11 +15,12 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
-# from views import health_check, trace_demo
+from django.urls import path, include
+
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('health/', health_check, name='health_check'),
-    # path('trace-demo/', trace_demo, name='trace_demo'),
-]
+    path('demo/', include('apps.demo.urls')),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
