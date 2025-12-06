@@ -1,0 +1,10 @@
+Dockerfile
+db.sqlite3
+static/
+media/
+__pycache__/
+*.pyc
+.env
+.venv
+venv/
+env/
