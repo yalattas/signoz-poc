@@ -14,6 +14,16 @@ import os
 import re
 from pathlib import Path
 
+import logging
+from opentelemetry import trace
+from opentelemetry._logs import set_logger_provider
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from opentelemetry.sdk._logs import LoggerProvider, LoggingHandler
+from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
+from opentelemetry.sdk.resources import Resource
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor, ConsoleSpanExporter
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -161,7 +171,34 @@ OTEL_EXPORTER_OTLP_ENDPOINT = os.environ.get("OTEL_EXPORTER_OTLP_ENDPOINT", "loc
 OTEL_EXPORTER_OTLP_PROTOCOL = os.environ.get("OTEL_EXPORTER_OTLP_PROTOCOL", "grpc")
 OTEL_RESOURCE_ATTRIBUTES = os.environ.get("OTEL_RESOURCE_ATTRIBUTES", f"service.name={OTEL_SERVICE_NAME},service.version={OTEL_SERVICE_VERSION}")
 
-# Logging configuration for OpenTelemetry
+if OTEL_ENABLED:
+    otlp_logger_provider = LoggerProvider(
+        resource=Resource.create(
+            {
+                "service.name": OTEL_SERVICE_NAME,
+                "service.version": OTEL_SERVICE_VERSION,
+                "service.instance.id": os.getpid(),
+            }
+        ),
+    )
+    set_logger_provider(otlp_logger_provider)
+    otlp_exporter = OTLPLogExporter(
+        endpoint=OTEL_EXPORTER_OTLP_ENDPOINT,
+        insecure=True  # Set to False if using HTTPS
+    )
+    otlp_logger_provider.add_log_record_processor(
+        BatchLogRecordProcessor(otlp_exporter)
+    )
+    otlp_handler = LoggingHandler(
+        level=logging.NOTSET, 
+        logger_provider=otlp_logger_provider
+    )
+    otlp_logger = logging.getLogger("django.otlp")
+    otlp_logger.setLevel(logging.DEBUG)
+    otlp_logger.addHandler(otlp_handler)
+
+
+# Logging configuration for Django
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
@@ -180,6 +217,10 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose'
         },
+        'otlp': {
+            'class': 'opentelemetry.sdk._logs.LoggingHandler',
+            'level': 'DEBUG',
+        },
     },
     'root': {
         'handlers': ['console'],
@@ -191,5 +232,12 @@ LOGGING = {
             'level': 'INFO',
             'propagate': False,
         },
+        'django.otlp': {
+            'handlers': ['console', 'otlp'],
+            'level': 'DEBUG',
+            'propagate': False,
+        },
     },
 }
+if OTEL_ENABLED:
+    LOGGING ['handlers']['otlp']['logger_provider'] = otlp_logger_provider

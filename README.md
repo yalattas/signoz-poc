@@ -71,7 +71,19 @@ helmfile apply -l name=signoz
 kubectl get pods -n signoz -w
 ```
 
-### Step 5: Deploy Demo Application (Optional)
+### Step 5: Build and Load Custom Django Application
+
+If you want to use the custom Django application in the `sample` directory:
+
+```bash
+# Build the Django Docker image
+docker build -t yasser/django:v0.7.7 sample/
+
+# Load the image into the Kind cluster
+kind load docker-image yasser/django:v0.7.7 --name signoz
+```
+
+### Step 6: Deploy Demo Application (Optional)
 
 The OpenTelemetry demo is an ecommerce platform with multiple microservices that generate telemetry data (metrics, traces, logs). This is useful for testing SigNoz functionality.
 
