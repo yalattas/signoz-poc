@@ -16,6 +16,8 @@ repositories:
     url: https://helm.altinity.com
   - name: opentelemetry
     url: https://open-telemetry.github.io/opentelemetry-helm-charts
+  - name: istio
+    url: https://istio-release.storage.googleapis.com/charts
 releases:
   - name: clickhouse-operator
     namespace: clickhouse
@@ -35,6 +37,12 @@ releases:
     version: 0.85.1
     values:
       - signoz.yaml
+  - name: signoz-infra
+    namespace: signoz
+    chart: signoz/k8s-infra
+    version: 0.15.0
+    values:
+      - signoz-infra.yaml
   - name: sample
     namespace: sample
     chart: ./chart/itscontained
@@ -46,5 +54,26 @@ releases:
   #   version: 0.38.6
   #   values:
   #     - demo.yaml
+  - name: istio-base
+    namespace: istio-system
+    chart: istio/base
+    version: 1.24.1
+  - name: istiod
+    namespace: istio-system
+    chart: istio/istiod
+    version: 1.24.1
+    values:
+      - istio-istiod.yaml
+  - name: gateway
+    namespace: istio-system
+    chart: istio/gateway
+    version: 1.24.1
+    values:
+      - istio-gateway.yaml
+  - name: istio-extras
+    namespace: istio-system
+    chart: ./chart/itscontained
+    values:
+      - istio-extras.yaml
 
 

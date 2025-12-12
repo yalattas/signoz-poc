@@ -1,0 +1,38 @@
+name: "istio-gateway"
+rbac:
+  enabled: true
+service:
+  type: ClusterIP
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http-envoy-prom
+    port: 15090
+    protocol: TCP
+    targetPort: 15090
+  - name: http2
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  - name: https
+    port: 443
+    protocol: TCP
+    targetPort: 443
+resources:
+  requests:
+    cpu: 150m
+    memory: 100Mi
+  limits:
+    memory: 300Mi
+autoscaling:
+  enabled: false
+env: {}
+podDisruptionBudget:
+  minAvailable: 1
+  unhealthyPodEvictionPolicy: AlwaysAllow
+terminationGracePeriodSeconds: 30
+volumes: []
+volumeMounts: []
+priorityClassName: ""

@@ -1,0 +1,35 @@
+resources:
+- apiVersion: networking.istio.io/v1
+  kind: Gateway
+  metadata:
+    name: global-gateway
+    namespace: istio-system
+  spec:
+    selector:
+      istio: gateway
+    servers:
+    - port:
+        number: 80
+        name: http
+        protocol: HTTP
+      hosts:
+      - "*"
+- apiVersion: telemetry.istio.io/v1
+  kind: Telemetry
+  metadata:
+    name: default-istio-telemetry
+    namespace: istio-system
+  spec:
+    accessLogging:
+      - providers:
+        - name: envoy # ref: https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-ExtensionProvider
+      - providers:
+        - name: signoz-logs
+    metrics:
+      - providers:
+          - name: prometheus
+    tracing:
+      - providers:
+        - name: signoz-traces
+        randomSamplingPercentage: 100.0
+        useRequestIdForTraceSampling: true

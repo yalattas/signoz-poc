@@ -1,0 +1,79 @@
+global:
+  cloud: other
+enabled: true
+clusterName: "signoz"
+otelCollectorEndpoint: http://signoz-otel-collector:4318
+otelInsecure: true
+insecureSkipVerify: true
+
+presets:
+  debugExporter:
+    enabled: true
+    verbosity: basic
+    samplingInitial: 90
+    samplingThereafter: 500
+  otlpExporter:
+    enabled: true
+  otlphttpExporter:
+    enabled: true
+  selfTelemetry:
+    endpoint: "http://signoz-otel-collector:4318"
+    insecure: true
+    insecureSkipVerify: true
+    signozApiKey: ""
+    apiKeyExistingSecretName: ""
+    apiKeyExistingSecretKey: ""
+    traces:
+      enabled: true
+    metrics:
+      enabled: true
+    logs:
+      enabled: true
+  logsCollection:
+    enabled: true
+    startAt: end
+    includeFilePath: true
+    includeFileName: false
+    include:
+      - /var/log/pods/*/*/*.log
+    multiline: null
+  hostMetrics:
+    enabled: true
+  kubeletMetrics:
+    enabled: true
+  clusterMetrics:
+    enabled: true
+  resourceDetection:
+    enabled: true
+  k8sEvents:
+    enabled: true
+    authType: serviceAccount
+    namespaces: []
+
+otelAgent:
+  enabled: true
+  name: "otel-agent"
+  ports:
+    otlp:
+      enabled: true
+      containerPort: 4317
+      servicePort: 4317
+      protocol: TCP
+    otlp-http:
+      enabled: true
+      containerPort: 4318
+      servicePort: 4318
+      nodePort: ""
+      hostPort: 4318
+      protocol: TCP
+    metrics:
+      enabled: true
+    health-check:
+      enabled: true
+      containerPort: 13133
+      servicePort: 13133
+      nodePort: ""
+      hostPort: 13133
+      protocol: TCP
+otelDeployment:
+  enabled: false

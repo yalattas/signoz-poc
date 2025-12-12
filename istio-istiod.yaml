@@ -1,0 +1,95 @@
+autoscaleEnabled: true
+autoscaleMin: 1
+autoscaleMax: 3
+replicaCount: 1
+resources:
+  requests:
+    cpu: 50m
+    memory: 150Mi
+env: {}
+
+
+cpu:
+  targetAverageUtilization: 80
+memory:
+  targetAverageUtilization: 80
+
+
+sidecarInjectorWebhook:
+  neverInjectSelector: []
+  alwaysInjectSelector: []
+  # This enables injection of sidecar in all namespaces,
+  # with the exception of namespaces with "istio-injection:disabled" annotation
+  # Only one environment should have this enabled.
+  enableNamespacesByDefault: false
+telemetry:
+  enabled: true
+  v2:
+    enabled: true
+    prometheus:
+      enabled: true
+    stackdriver:
+      enabled: false
+revision: ""
+revisionTags: []
+meshConfig:
+  enablePrometheusMerge: true
+  extensionProviders:
+    - name: signoz-traces
+      opentelemetry:
+        service: signoz-otel-collector.signoz.svc.cluster.local
+        port: 4318
+        http:
+          path: "/v1/traces"
+          timeout: 10s
+    - name: signoz-logs
+      envoyOtelAls:
+        service: signoz-otel-collector.signoz.svc.cluster.local
+        port: 4317
+        logName: istio_access_log
+    - name: envoy
+      envoyFileAccessLog:
+        path: "/dev/stdout"
+    - name: prometheus
+      prometheus: {}
+experimental:
+  stableValidationPolicy: false
+
+global:
+  defaultResources:
+    requests:
+      cpu: 20m
+      memory: 128Mi
+    limits:
+      memory: 512Mi
+  istiod:
+    enableAnalysis: true
+  logAsJson: false
+  logging:
+    level: "default:info"
+  omitSidecarInjectorConfigMap: false
+  # Configure whether Operator manages webhook configurations. The current behavior
+  # of Istiod is to manage its own webhook configurations.
+  # When this option is set as true, Istio Operator, instead of webhooks, manages the
+  # webhook configurations. When this option is set as false, webhooks manage their
+  # own webhook configurations.
+  operatorManageWebhooks: false
+  proxy:
+    # Expected values are: trace|debug|info|warning|error|critical|off
+    logLevel: info
+    resources:
+      requests:
+        cpu: 100m
+        memory: 80Mi
+      limits:
+        memory: 300Mi
+  waypoint:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 100Mi
+      limits:
+        cpu: "2"
+        memory: 1Gi
+base:
+  enableIstioConfigCRDs: true
