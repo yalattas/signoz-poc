@@ -24,13 +24,13 @@ presets:
     apiKeyExistingSecretName: ""
     apiKeyExistingSecretKey: ""
     traces:
-      enabled: true
+      enabled: false
     metrics:
       enabled: true
     logs:
-      enabled: true
+      enabled: false
   logsCollection:
-    enabled: true
+    enabled: false
     startAt: end
     includeFilePath: true
     includeFileName: false

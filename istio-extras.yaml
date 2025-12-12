@@ -22,9 +22,8 @@ resources:
   spec:
     accessLogging:
       - providers:
-        - name: envoy # ref: https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-ExtensionProvider
-      - providers:
         - name: signoz-logs
+        - name: envoy # ref: https://istio.io/latest/docs/reference/config/istio.mesh.v1alpha1/#MeshConfig-ExtensionProvider
     metrics:
       - providers:
           - name: prometheus

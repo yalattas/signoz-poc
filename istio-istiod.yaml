@@ -43,10 +43,17 @@ meshConfig:
           path: "/v1/traces"
           timeout: 10s
     - name: signoz-logs
-      envoyOtelAls:
+      opentelemetry:
         service: signoz-otel-collector.signoz.svc.cluster.local
-        port: 4317
-        logName: istio_access_log
+        port: 4318
+        http:
+          path: "/v1/logs"
+          timeout: 10s
+    # - name: signoz-logs
+    #   envoyOtelAls:
+    #     service: signoz-otel-collector.signoz.svc.cluster.local
+    #     port: 4318
+    #     # logName: istio_access_log
     - name: envoy
       envoyFileAccessLog:
         path: "/dev/stdout"

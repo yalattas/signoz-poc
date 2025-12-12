@@ -726,7 +726,7 @@ signoz-otel-gateway:
         protocol: TCP
         servicePort: 4317
       otlp-grpc:
-        enabled: false
+        enabled: true
       aws-cwmetrics:
         enabled: true
         containerPort: 8084

@@ -10,21 +10,45 @@ otlp_logger = logging.getLogger("django.otlp")
 
 class Zero(APIView):
   def get(self, request):
+    print('--------------')
+    print(request.__dict__)
+    print('--------------')
+    print(request.headers)
+    print('--------------')
+    print(request.data)
     result = 1 / 0
     return Response({"result": result})
 class Key(APIView):
   def get(self, request):
+    print('--------------')
+    print(request.__dict__)
+    print('--------------')
+    print(request.headers)
+    print('--------------')
+    print(request.data)
     data = {}
     return Response({"value": data["non_existent_key"]})
 class SampleSpan(APIView):
   def get(self, request):
     with tracer.start_as_current_span("sample_span"):
       # Simulate some processing
+      print('--------------')
+      print(request.__dict__)
+      print('--------------')
+      print(request.headers)
+      print('--------------')
+      print(request.data)
       total = sum(range(100))
     return Response({"total": total})
 class SampleLog(APIView):
   def get(self, request):
     # Get current span (should be the Django HTTP span created by instrumentation)
+    print('--------------')
+    print(request.__dict__)
+    print('--------------')
+    print(request.headers)
+    print('--------------')
+    print(request.data)
     current_span = trace.get_current_span()
 
     with tracer.start_as_current_span("sample_log_processing") as span:

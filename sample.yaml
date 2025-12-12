@@ -37,7 +37,7 @@ resources:
               value: "django-service"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: "http://signoz-otel-collector.signoz.svc.cluster.local:4317"
-            image: yasser/django:v0.7.9
+            image: yasser/django:v0.7.10
             imagePullPolicy: IfNotPresent
             ports:
             - containerPort: 8000
