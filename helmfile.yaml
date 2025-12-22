@@ -34,7 +34,7 @@ releases:
   - name: signoz
     namespace: signoz
     chart: signoz/signoz
-    version: 0.85.1
+    version: 0.104.1
     values:
       - signoz.yaml
   - name: signoz-infra
@@ -75,5 +75,3 @@ releases:
     chart: ./chart/itscontained
     values:
       - istio-extras.yaml
-
-
