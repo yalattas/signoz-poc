@@ -22,19 +22,19 @@ releases:
   - name: clickhouse-operator
     namespace: clickhouse
     chart: clickhouse-operator/altinity-clickhouse-operator
-    version: 0.25.0
+    version: 0.25.6
     values:
       - operator.yaml
   - name: clickhouse
     namespace: clickhouse
     chart: clickhouse/clickhouse
-    version: 0.3.6
+    version: 0.3.7
     values:
       - clickhouse.yaml
   - name: signoz
     namespace: signoz
     chart: signoz/signoz
-    version: 0.85.1
+    version: 0.104.1
     values:
       - signoz.yaml
   - name: signoz-infra
@@ -75,5 +75,3 @@ releases:
     chart: ./chart/itscontained
     values:
       - istio-extras.yaml
-
-
